@@ -1,0 +1,7 @@
+hubID=1234
+alertPhone=9546621746
+portalPhone=9546621746
+portalFreq=1
+logFreq=1
+critTemperature=30
+critHumidity=20
