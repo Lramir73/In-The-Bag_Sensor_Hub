@@ -13,6 +13,7 @@
 #include <HM_10.h>
 #include <SerialGSM.h>
 #include <LinkedList.h>
+//#include <String.h>
 
 //=====[ PINS ]=================================================================
 // HM-10 Pins
@@ -67,7 +68,7 @@ char Command[CMD_SIZE];  // Arbitrary Value for command size
 char Data[DATA_SIZE];    // Arbitrary Value for data size
 
 char HubID[HUB_ID_SIZE];
-char AlertPhone[PHONE_SIZE] = "+19546621746";  // Notification phone number
+char AlertPhone[PHONE_SIZE];  // Notification phone number
 char PortalPhone[PHONE_SIZE]; // Portal phone number
 
 byte PortalFreq = 0;    // Portal notification frequency (default = 0)
@@ -94,54 +95,64 @@ void setup()
   Serial.begin(9600);      // For the Arduino IDE Serial Monitor
   SerialB.begin(9600);     // For communication between Atmegas
   BTSerial.begin(9600);    // HM-10 default speed 
-  cell.begin(9600);        // Start up GSM module
-  cell.Verbose(true);
-  cell.Boot();
-  cell.FwdSMS2Serial();
-
+//  cell.begin(9600);        // Start up GSM module
+  
+  
   // Set Pin Modes
   pinMode(FLAG, INPUT);
   pinMode(MODE_SWITCH, INPUT);
   pinMode(MODE_LED, OUTPUT);
   pinMode(BUSY_LED, OUTPUT);
 
+  // Start General Setup Process
   Serial.println(F("Setup Start!"));
   
   // Show that Hub is Busy
   digitalWrite(BUSY_LED, HIGH);
+
+  // Send Initial GSM Functions
+//  cell.Verbose(true);
+//  cell.Boot();
+//  cell.FwdSMS2Serial();
   
   // Clear out buffers
-  clearBuffers();
+  clearAllBuffers();
   memset(HubID, '0', HUB_ID_SIZE);
   memset(AlertPhone, '0', PHONE_SIZE);
   memset(PortalPhone, '0', PHONE_SIZE);
-
- 
-
-  
   
   // Make sure Bluetooth is initially disconnected
   BTSerial.atTEST();
   
   // Read Mode switch and set the mode
   HubMode = digitalRead(MODE_SWITCH);
-  BTSerial.atROLE(HubMode);
-  BTSerial.atRESET();
+  if(HubMode)
+    BTSerial.atROLE('1');
+  else
+    BTSerial.atROLE('0');
 
-  Serial.println("\nWaiting for Hub_B...");
-  
+  BTSerial.atRESET();
+  digitalWrite(MODE_LED, HubMode);
+
   // Wait for B Flag to go LOW
+  Serial.println("\nWaiting for Hub_B...");
   while(digitalRead(FLAG) == HIGH);
 
   Serial.println(F("Hub_B is Ready!"));
+  SerialB.setTimeout(5000);
   
   /***** Get data from SD card *****/  
   // Get HubID from Hub_B
+
+//  while(SerialB.available() == 0);
+//  Serial.println(SerialB.read());
   
   // Get Alert Phone Number from Hub_B
+  sendSetupCommand(13, AlertPhone);
   
   // Get Portal Phone Number from Hub_B
-
+  sendSetupCommand(11, PortalPhone);
+  
   // Get Portal Notification Frequency from Hub_B
 
   // Get Sensor Logging Frequency from Hub_B
@@ -151,9 +162,15 @@ void setup()
   // Get Critical Humidity from Hub_B
 
   // Get Sensor MAC Addresses from Hub_B
+  SerialB.println("9 0");
+  SerialB.flush();
+  delay(5000);
+  SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+  Serial.println(Buffer);
+
   
   
-  // Show Hub is no Busy
+  // Clear Busy LED
   digitalWrite(BUSY_LED, LOW);
   Serial.println(F("Setup Done!"));
 }
@@ -170,9 +187,9 @@ void loop()
     
     // Switch to the correct role
     if(HubMode)
-      BTSerial.atROLE('1');
+      BTSerial.atROLE('1'); // Set to Master
     else
-      BTSerial.atROLE('0');
+      BTSerial.atROLE('0'); // Set to Slave
       
     // Reset Bluetooth Module
     BTSerial.atRESET();
@@ -185,11 +202,11 @@ void loop()
   if(HubMode)
   {
     // Bluetooth is in Master Role (Used for Sensor Checks)
-    Serial.println("Starting Sensor Check!");
+//    Serial.println("Starting Sensor Check!");
     Sensor * s = SensorList.get(0);
-    BTSerial.atCO('N',s->address);
+//    BTSerial.atCO('N',s->address);
 
-    Serial.println("Requesting Data from Sensors");
+//    Serial.println("Requesting Data from Sensors");
     while(BTSerial.connected())
     {
       BTSerial.write("1");
@@ -213,7 +230,7 @@ void loop()
 /***** BLUETOOTH PARSER *****/
 void BluetoothParser(void)
 {
-  byte ByteCount =  BTSerial.readBytesUntil(';', Buffer, BUFF_SIZE-1);
+  byte ByteCount =  BTSerial.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
   
   if(ByteCount  > 0) 
   {
@@ -325,12 +342,12 @@ void BluetoothParser(void)
   }
 
   // Clean up buffers
-  clearBuffers();
+  clearAllBuffers();
 
   // Flush BTSerial TX
   BTSerial.flush();
 
-  // Clean up the rest of BTSerial Queue
+  // Clean up the rest of BTSerial Rx
   while(BTSerial.available()) 
     BTSerial.read();
 
@@ -352,17 +369,47 @@ void printBuffers()
 }
 
 /***** BUFFER CLEANER *****/
-void clearBuffers()
+void clearAllBuffers()
 {
   memset(Buffer, 0, BUFF_SIZE);   // Clear contents of Buffer
   memset(Command, 0, CMD_SIZE);   // Clear contents of Buffer
   memset(Data, 0, DATA_SIZE);     // Clear contents of Buffer
 }
 
+void clearBuffer()
+{
+  memset(Buffer, 0, BUFF_SIZE);   // Clear contents of main Buffer
+}
+
+/***** HUB_B SETUP COMMAND *****/
+void sendSetupCommand(byte cmd, char * dest)
+{
+  // Send a command to Hub_B
+  Serial.println(cmd);
+  SerialB.println(cmd);
+  SerialB.flush();
+
+  
+  // Read Response from Hub_B
+//  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+
+//  strcpy(Buffer, s);
+  Serial.println(SerialB.readString());
+//  strcpy(dest, Buffer);
+  
+//  if(bytesRead > 0)
+//  {
+//    Serial.println(Buffer);
+//    strcpy(dest, Buffer);
+//  }
+}
+
+
+
 /***** CASE 5 *****/
 void getHubID()
 {
-  BTSerial.print(HubID);
+  BTSerial.println(HubID);
 }
 
 /***** CASE 6 *****/
@@ -443,7 +490,7 @@ void setAlertPhone()
 /***** CASE 13 *****/
 void getPortalPhone()
 {
-  BTSerial.print(PortalPhone);
+  BTSerial.println(PortalPhone);
 }
 
 /***** CASE 14 *****/
@@ -456,7 +503,7 @@ void setPortalPhone()
 /***** CASE 15 *****/
 void getPortalFreq()
 {
-  BTSerial.print(PortalFreq);
+  BTSerial.println(PortalFreq);
 }
 
 /***** CASE 16 *****/
