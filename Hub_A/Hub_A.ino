@@ -120,6 +120,8 @@ void setup()
   memset(HubID, '0', HUB_ID_SIZE);
   memset(AlertPhone, '0', PHONE_SIZE);
   memset(PortalPhone, '0', PHONE_SIZE);
+
+//  BTSerial.listen();
   
   // Make sure Bluetooth is initially disconnected
   BTSerial.atTEST();
@@ -139,7 +141,9 @@ void setup()
   while(digitalRead(FLAG) == HIGH);
 
   Serial.println(F("Hub_B is Ready!"));
-  SerialB.setTimeout(5000);
+//  SerialB.setTimeout(5000);
+
+//  SerialB.listen();
   
   /***** Get data from SD card *****/  
   // Get HubID from Hub_B
@@ -169,7 +173,7 @@ void setup()
   Serial.println(Buffer);
 
   
-  
+//  BTSerial.listen();
   // Clear Busy LED
   digitalWrite(BUSY_LED, LOW);
   Serial.println(F("Setup Done!"));
@@ -389,19 +393,16 @@ void sendSetupCommand(byte cmd, char * dest)
   SerialB.println(cmd);
   SerialB.flush();
 
+  delay(500);
   
   // Read Response from Hub_B
-//  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
-
-//  strcpy(Buffer, s);
-  Serial.println(SerialB.readString());
-//  strcpy(dest, Buffer);
+  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
   
-//  if(bytesRead > 0)
-//  {
-//    Serial.println(Buffer);
-//    strcpy(dest, Buffer);
-//  }
+  if(bytesRead > 0)
+  {
+    Serial.println(Buffer);
+    strcpy(dest, Buffer);
+  }
 }
 
 
