@@ -1,3 +1,5 @@
+/***** CASE 1 *****/
+
 /***** CASE 2 *****/
 void getHubID()
 {
@@ -13,6 +15,9 @@ void setHubID()
   else
     BTSerial.println("Command Failed.");
 }
+
+/***** CASE 3 *****/
+
 
 /***** CASE 7 *****/
 void getSensorList()

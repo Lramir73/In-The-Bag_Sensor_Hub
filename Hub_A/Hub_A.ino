@@ -65,10 +65,9 @@ byte PortalFreq = 0;          // Portal notification frequency (default = 0)
 byte LoggingFreq = 0;         // Sensor logging frequency (default = 0)
 
 bool HubMode = false;
-bool flagCheck = false;
 
-int critTemp = 30;
-int critHum = 50;
+int critTemp = 0;
+int critHum = 0;
 
 
 //=====[ CLASSES ]==============================================================
@@ -83,8 +82,7 @@ class Sensor
 LinkedList<Sensor*> SensorList =  LinkedList<Sensor*>();
 HM_10 BTSerial(RX_BT, TX_BT, KEY, STATE);
 SoftwareSerial SerialB(RX_B, TX_B);
-SerialGSM cell(RX_GSM, TX_GSM);
-
+//SerialGSM cell(RX_GSM, TX_GSM);
 
 
 //=====[ SETUP ]================================================================
@@ -122,70 +120,21 @@ void setup()
 
   // Listen to Bluetooth Serial
   BTSerial.listen();
-  
-  // Make sure Bluetooth is initially disconnected
-  BTSerial.atTEST();
-  
-  // Read Mode switch and set the mode
-  HubMode = digitalRead(MODE_SWITCH);
-  if(HubMode)
-  {
-    BTSerial.atROLE('1');
-    Serial.println(F("Entering Hub Mode"));
-  }
-  else
-  {
-    BTSerial.atROLE('0');
-    Serial.println(F("Entering Config Mode"));
-  }
 
-  BTSerial.atRESET();
-  digitalWrite(MODE_LED, HubMode);
+  // Setup the Bluetooth Mode
+  setupBluetooth();
 
   // Wait for B Flag to go LOW
   Serial.print(F("Waiting for Hub_B..."));
   while(digitalRead(FLAG) == HIGH);
-
   Serial.println(F("Hub_B is Ready!"));
 
   // Listen to Hub_B Serial
   SerialB.listen();
 
   /***** Get data from SD card *****/ 
-  Serial.println(F("Getting Data From SD Card")); 
-  // Get Hub ID from Hub_B
-  sendSetupCommand("23", HubID);
-  
-  // Get Alert Phone Number from Hub_B
-  sendSetupCommand("13", AlertPhone);
-  
-  // Get Portal Phone Number from Hub_B
-  sendSetupCommand("11", PortalPhone);
-
-  // Clean up Buffers again...
-  clearAllBuffers();
-  
-  // Get Critical Temperature from Hub_B
-  sendSetupCommand("19", Data);
-  critTemp = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
-  
-  // Get Critical Humidity from Hub_B
-  sendSetupCommand("21", Data);
-  critTemp = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
-  
-  // Get Sensor MAC Addresses from Hub_B
-  sendSetupCommand("9 0", Data);
-
-  // Add the Sensor to SensorList
-  Sensor * newSensor = new Sensor();
-  memcpy(newSensor->address, Data, ADDR_SIZE);
-  newSensor->address[ADDR_SIZE] = '\0';
-
-  SensorList.add(newSensor);
-  Serial.print("Sensor 0: ");
-  Serial.println(newSensor->address);
+  setupInitial();
+  setupSensors();
 
   // Return to listening to Bluetooth Serial
   BTSerial.listen();
@@ -265,31 +214,20 @@ void clearBuffer()
   memset(Buffer, 0, BUFF_SIZE);   // Clear contents of main Buffer
 }
 
-void printBuffers()
-{
-  // Print out Command
-  BTSerial.print("Command : ");
-  BTSerial.println(Command);
-
-  // Print out Data parameters
-  BTSerial.print("Data    : ");
-  BTSerial.println(Data);
-}
-
 
 //==============================================================================
 void checkSensor(byte num)
 {
   // Get Sensor MAC Address from SensorList
-  Serial.println("Starting Sensor Check!");
+  Serial.println(F("Starting Sensor Check!"));
   Sensor * s = SensorList.get(0);
 
   // Connect to the Sensor
-  Serial.println("Connecting to Sensor!");  
+  Serial.println(F("Connecting to Sensor!"));  
   BTSerial.atCO('N',s->address);
   delay(1000);
 
-  Serial.println("Requesting Data from Sensor...");
+  Serial.println(F("Requesting Data from Sensor..."));
   float t = 0;
   float h = 0;
 
@@ -301,10 +239,10 @@ void checkSensor(byte num)
     if(BTSerial.available())
     {
       t = BTSerial.parseFloat();
-      Serial.print("Temperature: ");
+      Serial.print(F("Temperature: "));
       Serial.print(t);          // Prints Temperature as Float
 //      Serial.print(176, BYTE);  // Prints Degree Symbol
-      Serial.println(" C");      // Prints Celsius
+      Serial.println(F(" C"));      // Prints Celsius
     }
 
     // Wait before Sending Another Command
@@ -316,9 +254,9 @@ void checkSensor(byte num)
     if(BTSerial.available())
     {
       h = BTSerial.parseFloat();
-      Serial.print("Humidity: ");
+      Serial.print(F("Humidity: "));
       Serial.print(h);
-      Serial.println(" %RH");
+      Serial.println(F(" %RH"));
     }
 
     

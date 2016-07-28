@@ -62,7 +62,7 @@ void BluetoothParser(void)
         getPortalFreq();
         break;
       default:
-        BTSerial.println("Invalid Command");
+        BTSerial.println(F("Invalid Command"));
         break;
     }
   }
