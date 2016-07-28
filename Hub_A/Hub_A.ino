@@ -1,24 +1,21 @@
 //==============================================================================
-// Program:      Hub_1.4.ino
+// Program:      Hub_A.ino
 // Author:       
-// Version:      1.5
-// Target:       UNO R3, IDE 1.6.9 
-// Date:         2016/07/11
-// Notes:        
-//               Uses SoftwareSerial I/O, Linked Lists
-// Reference:    
+// Version:      1.7
+// Target:       Hub A
+// Date:         2016/07/28
 //==============================================================================
 
 //=====[ INCLUDE ]==============================================================
-#include <HM_10.h>
-#include <SerialGSM.h>
 #include <LinkedList.h>
-//#include <String.h>
+#include <SerialGSM.h>
+#include <HM_10.h>
+
 
 //=====[ PINS ]=================================================================
 // HM-10 Pins
-#define RX  2
-#define TX  3
+#define RX_BT  2
+#define TX_BT  3
 #define KEY  4
 #define STATE  5
 
@@ -39,7 +36,6 @@
 #define BUSY_LED 13
 
 
-
 //=====[ CONSTANTS ]============================================================
 #define MAX_ADDRESSES 6
 #define BUFF_SIZE 20
@@ -55,24 +51,18 @@
 #define MIN_CMD 0
 #define MAX_CMD 26
 
-//=====[ CLASSES ]==============================================================
-class Sensor
-{
-  public:
-    char address[ADDR_SIZE + 1];
-};
 
 //=====[ VARIABLES ]============================================================
-char Buffer[BUFF_SIZE];  // Serial buffer
-char Command[CMD_SIZE];  // Arbitrary Value for command size
-char Data[DATA_SIZE];    // Arbitrary Value for data size
+char Buffer[BUFF_SIZE];        // Serial buffer
+char Command[CMD_SIZE];       // Arbitrary Value for command size
+char Data[DATA_SIZE];         // Arbitrary Value for data size
 
 char HubID[HUB_ID_SIZE];
-char AlertPhone[PHONE_SIZE];  // Notification phone number
-char PortalPhone[PHONE_SIZE]; // Portal phone number
+char AlertPhone[PHONE_SIZE];      // Notification phone number
+char PortalPhone[PHONE_SIZE];     // Portal phone number
 
-byte PortalFreq = 0;    // Portal notification frequency (default = 0)
-byte LoggingFreq = 0;   // Sensor logging frequency (default = 0)
+byte PortalFreq = 0;          // Portal notification frequency (default = 0)
+byte LoggingFreq = 0;         // Sensor logging frequency (default = 0)
 
 bool HubMode = false;
 bool flagCheck = false;
@@ -80,12 +70,20 @@ bool flagCheck = false;
 int critTemp = 30;
 int critHum = 50;
 
-char message[] = "Check The Bag!";
 
-HM_10 BTSerial(RX, TX, KEY, STATE);
-SerialGSM cell(RX_GSM, TX_GSM);
-SoftwareSerial SerialB(RX_B, TX_B);
+//=====[ CLASSES ]==============================================================
+class Sensor
+{
+  public:
+    char address[ADDR_SIZE + 1];
+};
+
+
+//=====[ OBJECTS ]==============================================================
 LinkedList<Sensor*> SensorList =  LinkedList<Sensor*>();
+HM_10 BTSerial(RX_BT, TX_BT, KEY, STATE);
+SoftwareSerial SerialB(RX_B, TX_B);
+SerialGSM cell(RX_GSM, TX_GSM);
 
 
 
@@ -111,6 +109,7 @@ void setup()
   digitalWrite(BUSY_LED, HIGH);
 
   // Send Initial GSM Functions
+//  cell.listen();
 //  cell.Verbose(true);
 //  cell.Boot();
 //  cell.FwdSMS2Serial();
@@ -121,7 +120,8 @@ void setup()
   memset(AlertPhone, '0', PHONE_SIZE);
   memset(PortalPhone, '0', PHONE_SIZE);
 
-//  BTSerial.listen();
+  // Listen to Bluetooth Serial
+  BTSerial.listen();
   
   // Make sure Bluetooth is initially disconnected
   BTSerial.atTEST();
@@ -129,51 +129,70 @@ void setup()
   // Read Mode switch and set the mode
   HubMode = digitalRead(MODE_SWITCH);
   if(HubMode)
+  {
     BTSerial.atROLE('1');
+    Serial.println(F("Entering Hub Mode"));
+  }
   else
+  {
     BTSerial.atROLE('0');
+    Serial.println(F("Entering Config Mode"));
+  }
 
   BTSerial.atRESET();
   digitalWrite(MODE_LED, HubMode);
 
   // Wait for B Flag to go LOW
-  Serial.println("\nWaiting for Hub_B...");
+  Serial.print(F("Waiting for Hub_B..."));
   while(digitalRead(FLAG) == HIGH);
 
   Serial.println(F("Hub_B is Ready!"));
-//  SerialB.setTimeout(5000);
 
-//  SerialB.listen();
-  
-  /***** Get data from SD card *****/  
-  // Get HubID from Hub_B
+  // Listen to Hub_B Serial
+  SerialB.listen();
 
-//  while(SerialB.available() == 0);
-//  Serial.println(SerialB.read());
+  /***** Get data from SD card *****/ 
+  Serial.println(F("Getting Data From SD Card")); 
+  // Get Hub ID from Hub_B
+  sendSetupCommand("23", HubID);
   
   // Get Alert Phone Number from Hub_B
-  sendSetupCommand(13, AlertPhone);
+  sendSetupCommand("13", AlertPhone);
   
   // Get Portal Phone Number from Hub_B
-  sendSetupCommand(11, PortalPhone);
+  sendSetupCommand("11", PortalPhone);
+
+  // Clean up Buffers again...
+  clearAllBuffers();
   
-  // Get Portal Notification Frequency from Hub_B
-
-  // Get Sensor Logging Frequency from Hub_B
-
   // Get Critical Temperature from Hub_B
-
-  // Get Critical Humidity from Hub_B
-
-  // Get Sensor MAC Addresses from Hub_B
-  SerialB.println("9 0");
-  SerialB.flush();
-  delay(5000);
-  SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
-  Serial.println(Buffer);
-
+  sendSetupCommand("19", Data);
+  critTemp = atoi(Data);
+  memset(Data, '0', DATA_SIZE);
   
-//  BTSerial.listen();
+  // Get Critical Humidity from Hub_B
+  sendSetupCommand("21", Data);
+  critTemp = atoi(Data);
+  memset(Data, '0', DATA_SIZE);
+  
+  // Get Sensor MAC Addresses from Hub_B
+  sendSetupCommand("9 0", Data);
+
+  // Add the Sensor to SensorList
+  Sensor * newSensor = new Sensor();
+  memcpy(newSensor->address, Data, ADDR_SIZE);
+  newSensor->address[ADDR_SIZE] = '\0';
+
+  SensorList.add(newSensor);
+  Serial.print("Sensor 0: ");
+  Serial.println(newSensor->address);
+
+  // Return to listening to Bluetooth Serial
+  BTSerial.listen();
+
+  // Clean buffers one last time
+  clearAllBuffers();
+  
   // Clear Busy LED
   digitalWrite(BUSY_LED, LOW);
   Serial.println(F("Setup Done!"));
@@ -191,10 +210,16 @@ void loop()
     
     // Switch to the correct role
     if(HubMode)
+    {
       BTSerial.atROLE('1'); // Set to Master
+      Serial.println(F("Entering Hub Mode"));
+    }
     else
+    {
       BTSerial.atROLE('0'); // Set to Slave
-      
+      Serial.println(F("Entering Config Mode"));
+    }
+    
     // Reset Bluetooth Module
     BTSerial.atRESET();
 
@@ -206,17 +231,17 @@ void loop()
   if(HubMode)
   {
     // Bluetooth is in Master Role (Used for Sensor Checks)
-//    Serial.println("Starting Sensor Check!");
-    Sensor * s = SensorList.get(0);
-//    BTSerial.atCO('N',s->address);
-
-//    Serial.println("Requesting Data from Sensors");
-    while(BTSerial.connected())
-    {
-      BTSerial.write("1");
-      
-    }
     
+    // Wait for Alarm Flag
+    Serial.println(F("Waiting for Alarm..."));
+    while(digitalRead(FLAG) == LOW);
+
+    // Check the first Sensor
+    checkSensor(0);
+    
+    // Wait until mode is switched back
+    Serial.println(F("Waiting To Switch Back To Config Mode..."));
+    while(HubMode == digitalRead(MODE_SWITCH));
   }
   else
   {
@@ -228,151 +253,6 @@ void loop()
 
 }
 //==============================================================================
-
-//=====[ SUBROUTINES ]==========================================================
-
-/***** BLUETOOTH PARSER *****/
-void BluetoothParser(void)
-{
-  byte ByteCount =  BTSerial.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
-  
-  if(ByteCount  > 0) 
-  {
-    // Print out entire buffer
-//    BTSerial.print("Buffer  : ");
-//    BTSerial.println(Buffer);
-
-    // Parse Command and Data parameters
-    strcpy(Command,strtok(Buffer," "));             
-    strcpy(Data,strtok(NULL,";"));
-
-    // Protect from overflowing buffers
-    Command[CMD_SIZE-1] = '\0';
-    Data[DATA_SIZE-1] = '\0';
-
-    // Print out command and data buffers
-//    printBuffers();
-
-    // Convert command into a byte
-    byte cmd = atoi(Command);
-
-    // Check if Busy status needs to be set
-    if(cmd > MIN_CMD && cmd < MAX_CMD)
-      digitalWrite(BUSY_LED, HIGH);
-      
-    // Execute Command
-    switch(cmd)
-    {
-      case 1: // Factory Reset (Maybe)
-        
-        break;
-      case 2: // Get MAC address (May not be needed)
-        
-        break;
-      case 3: // Get Hub Name (May not be needed)
-
-        break;
-      case 5: // Get Hub ID
-        getHubID();
-        break;
-      case 6: // Set Hub ID
-        setHubID();
-        break;
-      case 7: // Get List of Sensors
-        getSensorList();
-        break;
-      case 8: // Add a Sensor
-        addSensor();
-        break;
-      case 9: // Remove a Sensor
-        removeSensor();
-        break;
-      case 10: // Remove all Sensors
-        removeAllSensors();
-        break;
-      case 11: // Get Alert Phone #
-        getAlertPhone();
-        break;
-      case 12: // Set Alert Phone #
-        setAlertPhone();
-        break;
-      case 13: // Get Portal Phone #
-        getPortalPhone();
-        break;
-      case 14: // Set Portal Phone #
-        setPortalPhone();
-        break;
-      case 15: // Get Portal Notification Freq.
-        getPortalFreq();
-        break;
-      case 16: // Set Portal Notification Freq.
-        getPortalFreq();
-        break;
-      case 17: // Get Logging Frequency
-      
-        break;
-      case 18: // Set Logging Frequency
-      
-        break;
-      case 19: // Get Hub Time
-      
-        break;
-      case 20: // Set Hub Time
-      
-        break;
-      case 21: // Get Hub Date
-      
-        break;
-      case 22: // Set Hub Date
-      
-        break;
-      case 23: // Get Critical Temperature
-      
-        break;
-      case 24: // Set Critical Temperature
-      
-        break;
-      case 25: // Get Critical Humidity
-      
-        break;
-      case 26: // Set Critical Humidity
-      
-        break;
-      default:
-        BTSerial.println("Invalid Command");
-        break;
-      
-    }
-  }
-
-  // Clean up buffers
-  clearAllBuffers();
-
-  // Flush BTSerial TX
-  BTSerial.flush();
-
-  // Clean up the rest of BTSerial Rx
-  while(BTSerial.available()) 
-    BTSerial.read();
-
-  // Clear Busy Status
-  digitalWrite(BUSY_LED, LOW);
-  
-}
-
-/***** PRINT BUFFERS *****/
-void printBuffers()
-{
-  // Print out Command
-  BTSerial.print("Command : ");
-  BTSerial.println(Command);
-
-  // Print out Data parameters
-  BTSerial.print("Data    : ");
-  BTSerial.println(Data);
-}
-
-/***** BUFFER CLEANER *****/
 void clearAllBuffers()
 {
   memset(Buffer, 0, BUFF_SIZE);   // Clear contents of Buffer
@@ -385,154 +265,86 @@ void clearBuffer()
   memset(Buffer, 0, BUFF_SIZE);   // Clear contents of main Buffer
 }
 
-/***** HUB_B SETUP COMMAND *****/
-void sendSetupCommand(byte cmd, char * dest)
+void printBuffers()
 {
-  // Send a command to Hub_B
-  Serial.println(cmd);
-  SerialB.println(cmd);
-  SerialB.flush();
+  // Print out Command
+  BTSerial.print("Command : ");
+  BTSerial.println(Command);
 
-  delay(500);
-  
-  // Read Response from Hub_B
-  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
-  
-  if(bytesRead > 0)
-  {
-    Serial.println(Buffer);
-    strcpy(dest, Buffer);
-  }
+  // Print out Data parameters
+  BTSerial.print("Data    : ");
+  BTSerial.println(Data);
 }
 
-
-
-/***** CASE 5 *****/
-void getHubID()
-{
-  BTSerial.println(HubID);
-}
-
-/***** CASE 6 *****/
-void setHubID()
-{
-  memcpy(HubID, Data, HUB_ID_SIZE);
-  // Send TBD Command to Hub_B
-}
-
-/***** CASE 7 *****/
-void getSensorList()
-{
-  if(SensorList.size() == 0)
-    return;
-
-  for(byte i = 0; i < SensorList.size(); i++)
-  {
-    Sensor * s = SensorList.get(i);
-    BTSerial.print(s->address);
-  }
-}
-
-/***** CASE 8 *****/
-void addSensor()
-{
-  Sensor * newSensor = new Sensor();
-  memcpy(newSensor->address, Data, ADDR_SIZE);
-  newSensor->address[ADDR_SIZE] = '\0';
-
-  SensorList.add(newSensor);
-  SerialB.write("8");
-  SerialB.write(" ");
-  SerialB.write("0");
-  SerialB.write(" ");
-  SerialB.write(newSensor->address);
-  SerialB.flush();
-
-
-  // Send TBD Command to Hub_B
-}
-
-/***** CASE 9 *****/
-void removeSensor()
-{
-  if(SensorList.size() == 0)
-    return;
-  for(byte i = 0; i < SensorList.size(); i++)
-  {
-    Sensor * currSensor = SensorList.get(i);
-    if(memcmp(Data, currSensor->address, ADDR_SIZE) == 0)
-    {
-      SensorList.remove(i);
-    }   
-  }
-  // Send TBD Command to Hub_B
-}
-
-/***** CASE 10 *****/
-void removeAllSensors()
-{
-  SensorList.clear(); 
-  // Send TBD Command to Hub_B
-}
-
-/***** CASE 11 *****/
-void getAlertPhone()
-{
-  BTSerial.print(AlertPhone);
-}
-
-/***** CASE 12 *****/
-void setAlertPhone()
-{
-  memcpy(AlertPhone, Data, PHONE_SIZE);
-  // Send Set Command to Hub_B
-}
-
-/***** CASE 13 *****/
-void getPortalPhone()
-{
-  BTSerial.println(PortalPhone);
-}
-
-/***** CASE 14 *****/
-void setPortalPhone()
-{
-  memcpy(PortalPhone, Data, PHONE_SIZE);
-  // Send Set Command to Hub_B
-}
-
-/***** CASE 15 *****/
-void getPortalFreq()
-{
-  BTSerial.println(PortalFreq);
-}
-
-/***** CASE 16 *****/
-void setPortalFreq()
-{
-  byte freq = atoi(Data);
-  PortalFreq = freq;
-  // Send set command to Hub_B
-}
-
-/***** CASE 17 *****/
-/***** CASE 18 *****/
-/***** CASE 19 *****/
-/***** CASE 20 *****/
 
 //==============================================================================
 void checkSensor(byte num)
 {
-  
-}
+  // Get Sensor MAC Address from SensorList
+  Serial.println("Starting Sensor Check!");
+  Sensor * s = SensorList.get(0);
 
-void sendAlert()
-{
-  cell.Rcpt(AlertPhone);
-  cell.Message(message);
-  cell.SendSMS();
-  Serial.println(F("Message Sent!"));
-  cell.DeleteAllSMS();
+  // Connect to the Sensor
+  Serial.println("Connecting to Sensor!");  
+  BTSerial.atCO('N',s->address);
+  delay(1000);
+
+  Serial.println("Requesting Data from Sensor...");
+  float t = 0;
+  float h = 0;
+
+  if(BTSerial.connected())
+  {
+    // Get Temperature from the sensor
+    BTSerial.println("1");
+    delay(1000);
+    if(BTSerial.available())
+    {
+      t = BTSerial.parseFloat();
+      Serial.print("Temperature: ");
+      Serial.print(t);          // Prints Temperature as Float
+//      Serial.print(176, BYTE);  // Prints Degree Symbol
+      Serial.println(" C");      // Prints Celsius
+    }
+
+    // Wait before Sending Another Command
+    delay(3000);
+  
+    // Get Humidity from the sensor
+    BTSerial.println("2");
+    delay(1000);
+    if(BTSerial.available())
+    {
+      h = BTSerial.parseFloat();
+      Serial.print("Humidity: ");
+      Serial.print(h);
+      Serial.println(" %RH");
+    }
+
+    
+
+  }
+  // Send Data To Be Recorded In SD Card
+  SerialB.listen();
+  clearAllBuffers();
+  //sendData(0, t, h);
+
+
+
+  // Check if critical Temperature or Humidity
+  if(t >= critTemp && h >= critHum)
+    sendCommand("25 1", Data);
+  else if(t >= critTemp)
+    sendCommand("25 2", Data);
+  else if(h >= critHum)
+    sendCommand("25 3", Data);
+
+  Serial.println(F("Sensor Check Done!"));
+  
+  // Return to listening to Bluetooth
+  BTSerial.listen();
+  
+
 }
 
 
