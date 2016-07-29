@@ -29,10 +29,14 @@ void BluetoothParser(void)
         setHubID();
         break;
       case 4:
-        // getNumSensors();
+        getNumSensors();
         break;
       case 5: // Get List of Sensors
         getSensorList();
+        break;
+      case 6:
+        break;
+      case 7:
         break;
       case 8: // Add a Sensor
         addSensor();
@@ -59,7 +63,19 @@ void BluetoothParser(void)
         getPortalFreq();
         break;
       case 16: // Set Portal Notification Freq.
-        getPortalFreq();
+        setPortalFreq();
+        break;
+      case 17:
+        getLoggingFreq();
+        break;
+      case 18:
+        setLoggingFreq();
+        break;
+      case 19:
+        getHubTime();
+        break;
+      case 20:
+        setHumTime();
         break;
       default:
         BTSerial.println(F("Invalid Command"));

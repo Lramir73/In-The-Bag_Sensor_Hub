@@ -13,13 +13,16 @@ void setHubID()
   if(Buffer[0] == 'd')
     memcpy(HubID, Data, HUB_ID_SIZE);
   else
-    BTSerial.println("Command Failed.");
+    BTSerial.println(F("Command Failed."));
 }
 
-/***** CASE 3 *****/
+/***** CASE 4 *****/
+void getNumSensors()
+{
+  BTSerial.println(SensorList.size());
+}
 
-
-/***** CASE 7 *****/
+/***** CASE 5 *****/
 void getSensorList()
 {
   if(SensorList.size() == 0)
@@ -31,6 +34,10 @@ void getSensorList()
     BTSerial.print(s->address);
   }
 }
+
+/***** CASE 6 *****/
+/***** CASE 7 *****/
+
 
 /***** CASE 8 *****/
 void addSensor()
@@ -83,8 +90,11 @@ void getAlertPhone()
 /***** CASE 12 *****/
 void setAlertPhone()
 {
-  memcpy(AlertPhone, Data, PHONE_SIZE);
-  // Send Set Command to Hub_B
+  sendCommand("12");
+  if(Buffer[0] == 'd')
+    memcpy(AlertPhone, Data, PHONE_SIZE);
+  else
+    BTSerial.println(F("Command Failed."));
 }
 
 /***** CASE 13 *****/
@@ -96,8 +106,11 @@ void getPortalPhone()
 /***** CASE 14 *****/
 void setPortalPhone()
 {
-  memcpy(PortalPhone, Data, PHONE_SIZE);
-  // Send Set Command to Hub_B
+  sendCommand("10");
+  if(Buffer[0] == 'd')
+    memcpy(PortalPhone, Data, PHONE_SIZE);
+  else
+    BTSerial.println(F("Command Failed."));
 }
 
 /***** CASE 15 *****/
@@ -109,16 +122,43 @@ void getPortalFreq()
 /***** CASE 16 *****/
 void setPortalFreq()
 {
-  byte freq = atoi(Data);
-  PortalFreq = freq;
-  // Send set command to Hub_B
+  sendCommand("14");
+  
+  if(Buffer[0] == 'd')
+    PortalFreq = atoi(Data);
+  else
+    BTSerial.println(F("Command Failed."));
 }
 
 /***** CASE 17 *****/
-/***** CASE 18 *****/
-/***** CASE 19 *****/
-/***** CASE 20 *****/
+void getLoggingFreq()
+{
+  BTSerial.println(LoggingFreq);
+}
 
+/***** CASE 18 *****/
+void setLoggingFreq()
+{
+  sendCommand("16");
+  
+  if(Buffer[0] == 'd')
+    PortalFreq = atoi(Data);
+  else
+    BTSerial.println(F("Command Failed."));
+}
+
+/***** CASE 19 *****/
+void getHubTime()
+{
+  sendCommand("2");
+  BTSerial.println(Buffer);
+}
+
+/***** CASE 20 *****/
+void setHubTime()
+{
+  sendCommand("1");
+}
 
 
 
