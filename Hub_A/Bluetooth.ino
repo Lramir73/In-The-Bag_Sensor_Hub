@@ -17,7 +17,7 @@ void BluetoothParser(void)
 
     // Check if Busy status needs to be set
     if(cmd > MIN_CMD && cmd < MAX_CMD)
-    digitalWrite(BUSY_LED, HIGH);
+      digitalWrite(BUSY_LED, HIGH);
       
     // Execute Command
     switch(cmd)
@@ -34,9 +34,11 @@ void BluetoothParser(void)
       case 5: // Get List of Sensors
         getSensorList();
         break;
-      case 6:
+      case 6: // Get a Sensor ID/Address (TODO)
+//        setSensorID();
         break;
-      case 7:
+      case 7: // Set a Sensor ID (TODO)
+//        getSensorID();
         break;
       case 8: // Add a Sensor
         addSensor();
@@ -75,7 +77,27 @@ void BluetoothParser(void)
         getHubTime();
         break;
       case 20:
-        setHumTime();
+        setHubTime();
+        break;
+      case 21:
+        getHubDate();
+        break;
+      case 22:
+        setHubDate();
+      case 23:
+        getCritTemp();
+        break;
+      case 24:
+        setCritTemp();
+        break;
+      case 25:
+        getCritHum();
+        break;
+      case 26:
+        setCritHum();
+        break;
+      case 27:
+        getData();
         break;
       default:
         BTSerial.println(F("Invalid Command"));

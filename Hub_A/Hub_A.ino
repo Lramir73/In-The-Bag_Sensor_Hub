@@ -1,6 +1,6 @@
 //==============================================================================
 // Program:      Hub_A.ino
-// Author:       
+// Author:       Luis Ramirez
 // Version:      1.7
 // Target:       Hub A
 // Date:         2016/07/28
@@ -54,15 +54,15 @@
 
 //=====[ VARIABLES ]============================================================
 char Buffer[BUFF_SIZE];        // Serial buffer
-char Command[CMD_SIZE];       // Arbitrary Value for command size
-char Data[DATA_SIZE];         // Arbitrary Value for data size
+char Command[CMD_SIZE];        // Arbitrary Value for command size
+char Data[DATA_SIZE];          // Arbitrary Value for data size
 
 char HubID[HUB_ID_SIZE];
-char AlertPhone[PHONE_SIZE];      // Notification phone number
-char PortalPhone[PHONE_SIZE];     // Portal phone number
+char AlertPhone[PHONE_SIZE];   // Notification phone number
+char PortalPhone[PHONE_SIZE];  // Portal phone number
 
-byte PortalFreq = 0;          // Portal notification frequency (default = 0)
-byte LoggingFreq = 0;         // Sensor logging frequency (default = 0)
+byte PortalFreq = 0;           // Portal notification frequency (default = 0)
+byte LoggingFreq = 0;          // Sensor logging frequency (default = 0)
 
 bool HubMode = false;
 
@@ -82,7 +82,7 @@ class Sensor
 LinkedList<Sensor*> SensorList =  LinkedList<Sensor*>();
 HM_10 BTSerial(RX_BT, TX_BT, KEY, STATE);
 SoftwareSerial SerialB(RX_B, TX_B);
-//SerialGSM cell(RX_GSM, TX_GSM);
+SerialGSM cell(RX_GSM, TX_GSM);
 
 
 //=====[ SETUP ]================================================================
@@ -91,7 +91,7 @@ void setup()
   Serial.begin(9600);      // For the Arduino IDE Serial Monitor
   SerialB.begin(9600);     // For communication between Atmegas
   BTSerial.begin(9600);    // HM-10 default speed 
-//  cell.begin(9600);        // Start up GSM module
+  cell.begin(9600);        // Start up GSM module
   
   
   // Set Pin Modes
@@ -107,10 +107,10 @@ void setup()
   digitalWrite(BUSY_LED, HIGH);
 
   // Send Initial GSM Functions
-//  cell.listen();
-//  cell.Verbose(true);
-//  cell.Boot();
-//  cell.FwdSMS2Serial();
+  cell.listen();
+  cell.Verbose(true);
+  cell.Boot();
+  cell.FwdSMS2Serial();
   
   // Clear out buffers
   clearAllBuffers();
@@ -268,14 +268,15 @@ void checkSensor(byte num)
   //sendData(0, t, h);
 
 
-
   // Check if critical Temperature or Humidity
   if(t >= critTemp && h >= critHum)
-    sendCommand("25 1", Data);
+    sendAlert(1);
   else if(t >= critTemp)
-    sendCommand("25 2", Data);
+    sendAlert(2);
   else if(h >= critHum)
-    sendCommand("25 3", Data);
+    sendAlert(3);
+
+  
 
   Serial.println(F("Sensor Check Done!"));
   

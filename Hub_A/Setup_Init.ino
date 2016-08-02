@@ -55,7 +55,7 @@ void setupInitial()
   
   // Get Critical Humidity from Hub_B
   sendSetupCommand("21", Data);
-  critTemp = atoi(Data);
+  critHum = atoi(Data);
   memset(Data, '0', DATA_SIZE);
 }
 

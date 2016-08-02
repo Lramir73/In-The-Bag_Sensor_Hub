@@ -158,7 +158,92 @@ void getHubTime()
 void setHubTime()
 {
   sendCommand("1");
+
+  if(Buffer[0] == 'd')
+    BTSerial.println(F("Time Set!"));
+  else
+    BTSerial.println(F("Command Failed."));
 }
+
+/***** CASE 21 *****/
+void getHubDate()
+{
+  sendCommand("4");
+  BTSerial.println(Buffer);
+}
+
+/***** CASE 22 *****/
+void setHubDate()
+{
+  sendCommand("3");
+  
+  if(Buffer[0] == 'd')
+    BTSerial.println(F("Date Set!"));
+  else
+    BTSerial.println(F("Command Failed."));
+}
+
+/***** CASE 23 *****/
+void getCritTemp()
+{
+  BTSerial.println(critTemp);
+}
+
+/***** CASE 24 *****/
+void setCritTemp()
+{
+  sendCommand("18");
+
+  if(Buffer[0] == 'd')
+    critTemp = atoi(Data);
+  else
+    BTSerial.println(F("Command Failed."));
+}
+
+/***** CASE 25 *****/
+void getCritHum()
+{
+  BTSerial.println(critHum);
+}
+
+/***** CASE 26 *****/
+void setCritHum()
+{
+  sendCommand("20");
+  
+  if(Buffer[0] == 'd')
+    critHum = atoi(Data);
+  else
+    BTSerial.println(F("Command Failed."));
+}
+
+/***** CASE 27 *****/
+void getData()
+{
+  // Send a command to Hub_B
+  Serial.print(7);
+  Serial.print(' ');
+  Serial.println(Data);
+  Serial.flush();
+  
+  SerialB.print(7);
+  SerialB.print(' ');
+  SerialB.println(Data);
+  SerialB.flush();
+
+  delay(500);
+
+  while(SerialB.available())
+  {
+    char c = SerialB.read();
+    BTSerial.print(c);
+    Serial.print(c);
+  }
+  
+}
+
+
+
 
 
 

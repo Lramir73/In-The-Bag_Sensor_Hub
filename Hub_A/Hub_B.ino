@@ -38,7 +38,7 @@ void sendCommand(char * cmd, char * dest)
 }
 
 
-void sendCommand(char * cmd)
+void sendCommand(char * cmd)//might just want to change to byte
 {
   // Send a command to Hub_B
   Serial.print(cmd);
