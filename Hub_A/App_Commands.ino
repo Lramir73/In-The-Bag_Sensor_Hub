@@ -3,7 +3,8 @@
 /***** CASE 2 *****/
 void getHubID()
 {
-  BTSerial.println(HubID);
+  BTSerial.write(HubID, HUB_ID_SIZE);
+  BTSerial.write('\n');
 }
 
 /***** CASE 3 *****/
@@ -84,7 +85,7 @@ void removeAllSensors()
 /***** CASE 11 *****/
 void getAlertPhone()
 {
-  BTSerial.print(AlertPhone);
+  BTSerial.println(AlertPhone);
 }
 
 /***** CASE 12 *****/
@@ -231,7 +232,7 @@ void getData()
   SerialB.println(Data);
   SerialB.flush();
 
-  delay(500);
+  delay(1000);
 
   while(SerialB.available())
   {

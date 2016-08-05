@@ -41,22 +41,22 @@ void setupInitial()
   // Get Portal Frequency
   sendSetupCommand("15", Data);
   LoggingFreq = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
+  memset(Data, '\0', DATA_SIZE);
 
   // Get Logging Frequency
   sendSetupCommand("17", Data);
   LoggingFreq = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
+  memset(Data, '\0', DATA_SIZE);
   
   // Get Critical Temperature from Hub_B
   sendSetupCommand("19", Data);
   critTemp = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
+  memset(Data, '\0', DATA_SIZE);
   
   // Get Critical Humidity from Hub_B
   sendSetupCommand("21", Data);
   critHum = atoi(Data);
-  memset(Data, '0', DATA_SIZE);
+  memset(Data, '\0', DATA_SIZE);
 }
 
 
@@ -74,6 +74,24 @@ void setupSensors()
   Serial.print("Sensor 0: ");
   Serial.println(newSensor->address);
 }
+
+void printSetup()
+{
+  Serial.print(F("HubID: "));
+  Serial.write(HubID, HUB_ID_SIZE);
+  Serial.println();
+  Serial.print(F("AlertPhone: "));
+  Serial.println(AlertPhone);
+  Serial.print(F("PortalPhone: "));
+  Serial.println(PortalPhone);
+  Serial.print(F("Critical Temperature: "));
+  Serial.println(critTemp);
+  Serial.print(F("Critical Humidity: "));
+  Serial.println(critHum);
+  Serial.flush();
+}
+
+
 
 
 

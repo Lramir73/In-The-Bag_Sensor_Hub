@@ -64,11 +64,10 @@ char PortalPhone[PHONE_SIZE];  // Portal phone number
 byte PortalFreq = 0;           // Portal notification frequency (default = 0)
 byte LoggingFreq = 0;          // Sensor logging frequency (default = 0)
 
-bool HubMode = false;
-
 int critTemp = 0;
 int critHum = 0;
 
+bool HubMode = false;
 
 //=====[ CLASSES ]==============================================================
 class Sensor
@@ -79,7 +78,7 @@ class Sensor
 
 
 //=====[ OBJECTS ]==============================================================
-LinkedList<Sensor*> SensorList =  LinkedList<Sensor*>();
+LinkedList<Sensor*> SensorList = LinkedList<Sensor*>();
 HM_10 BTSerial(RX_BT, TX_BT, KEY, STATE);
 SoftwareSerial SerialB(RX_B, TX_B);
 SerialGSM cell(RX_GSM, TX_GSM);
@@ -109,7 +108,7 @@ void setup()
   // Send Initial GSM Functions
   cell.listen();
   cell.Verbose(true);
-  cell.Boot();
+//  cell.Boot();
   cell.FwdSMS2Serial();
   
   // Clear out buffers
@@ -141,6 +140,9 @@ void setup()
 
   // Clean buffers one last time
   clearAllBuffers();
+
+  // Show recieved values
+  printSetup();
   
   // Clear Busy LED
   digitalWrite(BUSY_LED, LOW);
@@ -241,8 +243,8 @@ void checkSensor(byte num)
       t = BTSerial.parseFloat();
       Serial.print(F("Temperature: "));
       Serial.print(t);          // Prints Temperature as Float
-//      Serial.print(176, BYTE);  // Prints Degree Symbol
-      Serial.println(F(" C"));      // Prints Celsius
+      Serial.write(176);        // Prints Degree Symbol
+      Serial.println(F(" C"));  // Prints Celsius
     }
 
     // Wait before Sending Another Command
@@ -265,7 +267,7 @@ void checkSensor(byte num)
   // Send Data To Be Recorded In SD Card
   SerialB.listen();
   clearAllBuffers();
-  //sendData(0, t, h);
+  sendData(0, t, h);
 
 
   // Check if critical Temperature or Humidity
