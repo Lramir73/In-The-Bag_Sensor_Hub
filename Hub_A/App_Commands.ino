@@ -151,8 +151,9 @@ void setLoggingFreq()
 /***** CASE 19 *****/
 void getHubTime()
 {
-  sendCommand("2");
+  sendGetCommand(2);
   BTSerial.println(Buffer);
+  BTSerial.flush();
 }
 
 /***** CASE 20 *****/
@@ -169,8 +170,9 @@ void setHubTime()
 /***** CASE 21 *****/
 void getHubDate()
 {
-  sendCommand("4");
+  sendGetCommand(4);
   BTSerial.println(Buffer);
+  BTSerial.flush();
 }
 
 /***** CASE 22 *****/

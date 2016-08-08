@@ -34,7 +34,8 @@ void sendCommand(char * cmd)//might just want to change to byte
   SerialB.print(' ');
   SerialB.println(Data);
   SerialB.flush();
-
+  SerialB.listen();
+  
   delay(1000);
   
   // Read Response from Hub_B
@@ -45,6 +46,27 @@ void sendCommand(char * cmd)//might just want to change to byte
     Serial.println(Buffer);
   }
   
+  BTSerial.listen();
+}
+
+void sendGetCommand(byte cmd)
+{
+  Serial.print(F("Sent: "));
+  Serial.println(cmd);
+  
+  SerialB.listen();
+  SerialB.println(cmd);
+  SerialB.flush();
+
+  // Read Response from Hub_B
+  clearBuffer();
+  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+  if(bytesRead > 0)
+  {
+    Serial.print(F("Received: "));
+    Serial.println(Buffer);
+  }
+  BTSerial.listen();
 }
 
 
@@ -58,8 +80,9 @@ void sendData(byte num, float temp, float humid)
   SerialB.print(" ");
   SerialB.println(humid);
   SerialB.flush();
+  SerialB.listen();
 
-  delay(500);
+  delay(1000);
   
   // Read Response from Hub_B
   byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
@@ -70,6 +93,8 @@ void sendData(byte num, float temp, float humid)
     if(Buffer[0] == 'd')
       Serial.println(F("Success!"));
   }
+  
+  BTSerial.listen();
 }
 
 

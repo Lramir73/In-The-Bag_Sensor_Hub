@@ -92,7 +92,7 @@ void setup()
   BTSerial.begin(9600);    // HM-10 default speed 
   cell.begin(9600);        // Start up GSM module
   
-  
+  SerialB.setTimeout(2000);
   // Set Pin Modes
   pinMode(FLAG, INPUT);
   pinMode(MODE_SWITCH, INPUT);
@@ -204,17 +204,7 @@ void loop()
 
 }
 //==============================================================================
-void clearAllBuffers()
-{
-  memset(Buffer, 0, BUFF_SIZE);   // Clear contents of Buffer
-  memset(Command, 0, CMD_SIZE);   // Clear contents of Buffer
-  memset(Data, 0, DATA_SIZE);     // Clear contents of Buffer
-}
 
-void clearBuffer()
-{
-  memset(Buffer, 0, BUFF_SIZE);   // Clear contents of main Buffer
-}
 
 
 //==============================================================================
@@ -244,7 +234,7 @@ void checkSensor(byte num)
       Serial.print(F("Temperature: "));
       Serial.print(t);          // Prints Temperature as Float
       Serial.write(176);        // Prints Degree Symbol
-      Serial.println(F(" C"));  // Prints Celsius
+      Serial.println(F("C"));  // Prints Celsius
     }
 
     // Wait before Sending Another Command
@@ -267,7 +257,8 @@ void checkSensor(byte num)
   // Send Data To Be Recorded In SD Card
   SerialB.listen();
   clearAllBuffers();
-  sendData(0, t, h);
+  SerialB.println("6 0 23.50 55.60");
+//  sendData(0, t, h);
 
 
   // Check if critical Temperature or Humidity
