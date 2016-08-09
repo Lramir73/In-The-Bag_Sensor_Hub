@@ -73,16 +73,24 @@ void sendGetCommand(byte cmd)
 void sendData(byte num, float temp, float humid)
 {
   Serial.println(F("Recording Data..."));
+  Serial.print(F("6 "));
+  Serial.print(num);
+  Serial.print(" ");
+  Serial.print(temp);
+  Serial.print(" ");
+  Serial.println(humid);
+  Serial.flush();
+  
   SerialB.print("6 ");
   SerialB.print(num);
-  SerialB.print(" ");
+  SerialB.print(' ');
   SerialB.print(temp);
-  SerialB.print(" ");
+  SerialB.print(' ');
   SerialB.println(humid);
   SerialB.flush();
   SerialB.listen();
 
-  delay(1000);
+  delay(2000);
   
   // Read Response from Hub_B
   byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
@@ -93,11 +101,21 @@ void sendData(byte num, float temp, float humid)
     if(Buffer[0] == 'd')
       Serial.println(F("Success!"));
   }
+  else
+    Serial.println(F("Fail!"));
   
   BTSerial.listen();
 }
 
-
+void checkErrorCode()
+{
+  if(Buffer[0] == 'e')
+  {
+    Serial.println("Error Encountered!");
+    Serial.print("Error Code: ");
+    Serial.println(Buffer);
+  }
+}
 
 
 

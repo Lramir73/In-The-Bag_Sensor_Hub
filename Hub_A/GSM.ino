@@ -23,14 +23,4 @@ void sendAlert(byte txt)
   
 }
 
-void printBytes(char * buff)
-{
-  for(byte i = 0; i < sizeof(buff); i++)
-  {
-    Serial.print(buff[i]);
-    Serial.print(' ');
-  }
-  Serial.println();
-  
-}
 

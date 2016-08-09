@@ -60,23 +60,85 @@ void setupInitial()
 }
 
 
+void getSetupSensor(byte num)
+{
+  // Send a command to Hub_B
+  Serial.print(F("Sent: "));
+  Serial.print(9);
+  Serial.print(' ');
+  Serial.println(num);
+  
+  SerialB.print(9);
+  SerialB.print(' ');
+  SerialB.println(num);
+  SerialB.flush();
+
+  delay(1000);
+  
+  // Read Response from Hub_B
+  clearBuffer();
+  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+  if(bytesRead > 0)
+  {
+    Serial.print(F("Received: "));
+    Serial.println(Buffer);
+  }
+}
+
+
 void setupSensors()
 {
-  // Get Sensor MAC Addresses from Hub_B
-  sendSetupCommand("9 0", Data);
+  // Loop and get each sensor address
+  for(byte i = 0; i < MAX_SENSORS; i++)
+  {
+    getSetupSensor(i);
+    if(Buffer[0] != 'e')
+    {
+      // Add the Sensor to SensorList
+      Sensor * newSensor = new Sensor();
+      memcpy(newSensor->address, Buffer, ADDR_SIZE);
+      newSensor->address[ADDR_SIZE] = '\0';
 
-  // Add the Sensor to SensorList
-  Sensor * newSensor = new Sensor();
-  memcpy(newSensor->address, Data, ADDR_SIZE);
-  newSensor->address[ADDR_SIZE] = '\0';
+      SensorList.add(newSensor);
 
-  SensorList.add(newSensor);
-  Serial.print("Sensor 0: ");
-  Serial.println(newSensor->address);
+      Serial.print(F("Sensor "));
+      Serial.print(i);
+      Serial.print(F(": "));
+      Serial.println(newSensor->address);
+    }
+    else
+    {
+      Serial.println("Done Reading Sensors from SD Card!");
+      break;
+    }
+    
+  }
+
+
+
+
+
+
+
+
+
+  
+//  // Get Sensor MAC Addresses from Hub_B
+//  sendSetupCommand("9 0", Data);
+//
+//  // Add the Sensor to SensorList
+//  Sensor * newSensor = new Sensor();
+//  memcpy(newSensor->address, Data, ADDR_SIZE);
+//  newSensor->address[ADDR_SIZE] = '\0';
+//
+//  SensorList.add(newSensor);
+//  Serial.print("Sensor 0: ");
+//  Serial.println(newSensor->address);
 }
 
 void printSetup()
 {
+  Serial.println();
   Serial.print(F("HubID: "));
   Serial.write(HubID, HUB_ID_SIZE);
   Serial.println();

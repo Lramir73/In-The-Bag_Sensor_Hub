@@ -14,7 +14,7 @@ void setHubID()
   if(Buffer[0] == 'd')
     memcpy(HubID, Data, HUB_ID_SIZE);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 4 *****/
@@ -37,8 +37,16 @@ void getSensorList()
 }
 
 /***** CASE 6 *****/
-/***** CASE 7 *****/
+void getSensorID()
+{
+  
+}
 
+/***** CASE 7 *****/
+void setSensorID()
+{
+  
+}
 
 /***** CASE 8 *****/
 void addSensor()
@@ -95,7 +103,7 @@ void setAlertPhone()
   if(Buffer[0] == 'd')
     memcpy(AlertPhone, Data, PHONE_SIZE);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 13 *****/
@@ -111,7 +119,7 @@ void setPortalPhone()
   if(Buffer[0] == 'd')
     memcpy(PortalPhone, Data, PHONE_SIZE);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 15 *****/
@@ -128,7 +136,7 @@ void setPortalFreq()
   if(Buffer[0] == 'd')
     PortalFreq = atoi(Data);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 17 *****/
@@ -145,7 +153,7 @@ void setLoggingFreq()
   if(Buffer[0] == 'd')
     PortalFreq = atoi(Data);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 19 *****/
@@ -164,7 +172,7 @@ void setHubTime()
   if(Buffer[0] == 'd')
     BTSerial.println(F("Time Set!"));
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 21 *****/
@@ -183,7 +191,7 @@ void setHubDate()
   if(Buffer[0] == 'd')
     BTSerial.println(F("Date Set!"));
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 23 *****/
@@ -200,7 +208,7 @@ void setCritTemp()
   if(Buffer[0] == 'd')
     critTemp = atoi(Data);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 25 *****/
@@ -217,7 +225,7 @@ void setCritHum()
   if(Buffer[0] == 'd')
     critHum = atoi(Data);
   else
-    BTSerial.println(F("Command Failed."));
+    checkErrorCode();
 }
 
 /***** CASE 27 *****/

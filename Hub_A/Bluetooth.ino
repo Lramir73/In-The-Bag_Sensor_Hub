@@ -35,10 +35,10 @@ void BluetoothParser(void)
         getSensorList();
         break;
       case 6: // Get a Sensor ID/Address (TODO)
-//        setSensorID();
+        getSensorID();
         break;
       case 7: // Set a Sensor ID (TODO)
-//        getSensorID();
+        setSensorID();
         break;
       case 8: // Add a Sensor
         addSensor();

@@ -113,9 +113,7 @@ void setup()
   
   // Clear out buffers
   clearAllBuffers();
-  memset(HubID, '0', HUB_ID_SIZE);
-  memset(AlertPhone, '0', PHONE_SIZE);
-  memset(PortalPhone, '0', PHONE_SIZE);
+  clearSettings();
 
   // Listen to Bluetooth Serial
   BTSerial.listen();
@@ -154,49 +152,24 @@ void setup()
 //=====[ LOOP ]=================================================================
 void loop() 
 {
-  if(digitalRead(MODE_SWITCH) != HubMode)
-  {
-    HubMode = !HubMode; // Invert the HubMode
-    BTSerial.atTEST();  // Make sure the module is disconnected
-    
-    // Switch to the correct role
-    if(HubMode)
-    {
-      BTSerial.atROLE('1'); // Set to Master
-      Serial.println(F("Entering Hub Mode"));
-    }
-    else
-    {
-      BTSerial.atROLE('0'); // Set to Slave
-      Serial.println(F("Entering Config Mode"));
-    }
-    
-    // Reset Bluetooth Module
-    BTSerial.atRESET();
+  // Check if the hub mode needs to be changed
+  checkHubSwitch();
 
-    // Set the Mode LED
-    digitalWrite(MODE_LED, HubMode);
-  }
-
-  
-  if(HubMode)
+  if(HubMode) // Bluetooth is in Master Role (Used for Sensor Checks)
   {
-    // Bluetooth is in Master Role (Used for Sensor Checks)
-    
     // Wait for Alarm Flag
     Serial.println(F("Waiting for Alarm..."));
     while(digitalRead(FLAG) == LOW);
 
     // Check the first Sensor
-    checkSensor(0);
+    checkSensor(0); // REPLACE WITH checkAllSensors
     
     // Wait until mode is switched back
     Serial.println(F("Waiting To Switch Back To Config Mode..."));
     while(HubMode == digitalRead(MODE_SWITCH));
   }
-  else
+  else  // Bluetooth is in Slave Role (Used for being configured by the App)
   {
-    // Bluetooth is in Slave Role (Used for being configured by the App)
     if(BTSerial.available())
       BluetoothParser();
   }
@@ -206,78 +179,6 @@ void loop()
 //==============================================================================
 
 
-
-//==============================================================================
-void checkSensor(byte num)
-{
-  // Get Sensor MAC Address from SensorList
-  Serial.println(F("Starting Sensor Check!"));
-  Sensor * s = SensorList.get(0);
-
-  // Connect to the Sensor
-  Serial.println(F("Connecting to Sensor!"));  
-  BTSerial.atCO('N',s->address);
-  delay(1000);
-
-  Serial.println(F("Requesting Data from Sensor..."));
-  float t = 0;
-  float h = 0;
-
-  if(BTSerial.connected())
-  {
-    // Get Temperature from the sensor
-    BTSerial.println("1");
-    delay(1000);
-    if(BTSerial.available())
-    {
-      t = BTSerial.parseFloat();
-      Serial.print(F("Temperature: "));
-      Serial.print(t);          // Prints Temperature as Float
-      Serial.write(176);        // Prints Degree Symbol
-      Serial.println(F("C"));  // Prints Celsius
-    }
-
-    // Wait before Sending Another Command
-    delay(3000);
-  
-    // Get Humidity from the sensor
-    BTSerial.println("2");
-    delay(1000);
-    if(BTSerial.available())
-    {
-      h = BTSerial.parseFloat();
-      Serial.print(F("Humidity: "));
-      Serial.print(h);
-      Serial.println(F(" %RH"));
-    }
-
-    
-
-  }
-  // Send Data To Be Recorded In SD Card
-  SerialB.listen();
-  clearAllBuffers();
-  SerialB.println("6 0 23.50 55.60");
-//  sendData(0, t, h);
-
-
-  // Check if critical Temperature or Humidity
-  if(t >= critTemp && h >= critHum)
-    sendAlert(1);
-  else if(t >= critTemp)
-    sendAlert(2);
-  else if(h >= critHum)
-    sendAlert(3);
-
-  
-
-  Serial.println(F("Sensor Check Done!"));
-  
-  // Return to listening to Bluetooth
-  BTSerial.listen();
-  
-
-}
 
 
 
