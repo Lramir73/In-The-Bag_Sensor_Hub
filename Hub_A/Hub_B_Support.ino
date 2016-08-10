@@ -111,8 +111,8 @@ void checkErrorCode()
 {
   if(Buffer[0] == 'e')
   {
-    Serial.println("Error Encountered!");
-    Serial.print("Error Code: ");
+    Serial.println(F("Error Encountered!"));
+    Serial.print(F("Error Code: "));
     Serial.println(Buffer);
   }
 }

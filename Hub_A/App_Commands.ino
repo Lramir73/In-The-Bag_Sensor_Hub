@@ -1,4 +1,8 @@
 /***** CASE 1 *****/
+void factoryReset()
+{
+  
+}
 
 /***** CASE 2 *****/
 void getHubID()
@@ -55,39 +59,99 @@ void addSensor()
   memcpy(newSensor->address, Data, ADDR_SIZE);
   newSensor->address[ADDR_SIZE] = '\0';
 
+  
+  // Send the new Sensor info to be saved in SD card
   SensorList.add(newSensor);
   SerialB.write("8");
   SerialB.write(" ");
-  SerialB.write("0");
-  SerialB.write(" ");
   SerialB.write(newSensor->address);
+  SerialB.write("\n");
   SerialB.flush();
-
-
-  // Send TBD Command to Hub_B
+  SerialB.listen();
+  
+  delay(1000);
+  
+  clearBuffer();
+  // Get reply back from Hub_B
+  byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+  if(bytesRead > 0)
+    Serial.println(Buffer);
+  
+  BTSerial.listen();
+  
+  if(Buffer[0] == 'd')
+    BTSerial.println(F("Sensor Added!"));
+  else
+    checkErrorCode();
 }
 
 /***** CASE 9 *****/
 void removeSensor()
 {
+  // Check if there are any sensors to remove
   if(SensorList.size() == 0)
+  {
+    Serial.println(F("No Sensors to remove!"));
     return;
+  }
+
+  // Convert the parameter into a number
+  int num = atoi(Data);
+
+  // Check if vaild
+  if(num > SensorList.size())
+  {
+    Serial.println(F("Invalid Sensor Number!"));
+    return;
+  }
+
+  // Remove sensor from the list
+  SensorList.remove(num);
+
+  // Send command to clear the Sensor File in the SD Card
+  sendGetCommand(25);
+
+  // Send Commands to Re-add all Sensors to the SD card file
   for(byte i = 0; i < SensorList.size(); i++)
   {
     Sensor * currSensor = SensorList.get(i);
-    if(memcmp(Data, currSensor->address, ADDR_SIZE) == 0)
-    {
-      SensorList.remove(i);
-    }   
+    SerialB.write("8");
+    SerialB.write(" ");
+    SerialB.write(currSensor->address);
+    SerialB.write("\n");
+    SerialB.flush();
+
+    delay(1000);
+    
+    clearBuffer();
+    byte bytesRead = SerialB.readBytesUntil('\n', Buffer, BUFF_SIZE-1);
+    if(bytesRead > 0)
+      Serial.println(Buffer);
+    
   }
-  // Send TBD Command to Hub_B
+
+
+
+  
+//  for(byte i = 0; i < SensorList.size(); i++)
+//  {
+//    Sensor * currSensor = SensorList.get(i);
+//    if(memcmp(Data, currSensor->address, ADDR_SIZE) == 0)
+//    {
+//      SensorList.remove(i);
+//    }   
+//  }
+
 }
 
 /***** CASE 10 *****/
 void removeAllSensors()
 {
+  // Clear off all sensors from SensorList
   SensorList.clear(); 
-  // Send TBD Command to Hub_B
+  
+  // Send command to clear the Sensor File in the SD Card
+  sendGetCommand(25);
 }
 
 /***** CASE 11 *****/

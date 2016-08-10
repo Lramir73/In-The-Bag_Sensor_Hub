@@ -22,6 +22,9 @@ void BluetoothParser(void)
     // Execute Command
     switch(cmd)
     {
+      case 1:
+        factoryReset();
+        break;
       case 2: // Get Hub ID
         getHubID();
         break;

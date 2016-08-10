@@ -41,7 +41,17 @@ void checkSensor(byte num)
       Serial.print(h);
       Serial.println(F(" %RH"));
     }
+
+    // Disconnnect from the sensor
+    BTSerial.atTEST();
   }
+  else
+  {
+    Serial.print(F("Could not connect to Sensor ")); 
+    Serial.print(num);
+    Serial.println(F("!"));  
+  }
+  
   
   // Send Data To Be Recorded In SD Card
   SerialB.listen();
@@ -70,12 +80,19 @@ void checkAllSensors()
   digitalWrite(BUSY_LED, HIGH);
   
   Serial.println(F("Performing a Sensor Check!"));
+  
+  //TODO: FIX ISSUE WHERE IT DOESNT CONNECT PROPERLY 
+  //POSSIBLY DUE TO BEING CONNECTED TO MULTIPLE SENSORS OR UUID ISSUE
 
-  // Loop through and check each sensor
+  // Loop through and check each sensor 
   for(byte i = 0; i < SensorList.size(); i++)
     checkSensor(i);
 
-  Serial.print(F("Done Checking All Sensors!"));
+  Serial.println(F("Done Checking All Sensors!"));
+  
+  // Notify Hub_B that the sensor check is done
+  sendGetCommand(24);
+  
   // Clear Busy Status
   digitalWrite(BUSY_LED, LOW);
 }
