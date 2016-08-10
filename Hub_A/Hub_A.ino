@@ -37,7 +37,6 @@
 
 
 //=====[ CONSTANTS ]============================================================
-#define MAX_ADDRESSES 6
 #define BUFF_SIZE 20
 #define CMD_SIZE 3
 #define DATA_SIZE 16
@@ -153,20 +152,20 @@ void setup()
 void loop() 
 {
   // Check if the hub mode needs to be changed
-  checkHubSwitch();
+  if(checkModeChange())
+    switchMode();
 
   if(HubMode) // Bluetooth is in Master Role (Used for Sensor Checks)
   {
-    // Wait for Alarm Flag
+    // Wait for Alarm Flag or for the Mode Switch
     Serial.println(F("Waiting for Alarm..."));
-    while(digitalRead(FLAG) == LOW);
+    while(digitalRead(FLAG) == LOW && !checkModeChange());
 
-    // Check the first Sensor
-    checkSensor(0); // REPLACE WITH checkAllSensors
-    
-    // Wait until mode is switched back
-    Serial.println(F("Waiting To Switch Back To Config Mode..."));
-    while(HubMode == digitalRead(MODE_SWITCH));
+    // Check if there was a change in the Mode Switch, if not then check sensors
+    if(checkModeChange())
+      switchMode();
+    else
+      checkAllSensors();
   }
   else  // Bluetooth is in Slave Role (Used for being configured by the App)
   {
@@ -174,7 +173,6 @@ void loop()
       BluetoothParser();
   }
   
-
 }
 //==============================================================================
 

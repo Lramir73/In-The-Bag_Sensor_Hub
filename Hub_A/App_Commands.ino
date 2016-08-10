@@ -32,7 +32,7 @@ void getSensorList()
   for(byte i = 0; i < SensorList.size(); i++)
   {
     Sensor * s = SensorList.get(i);
-    BTSerial.print(s->address);
+    BTSerial.println(s->address);
   }
 }
 

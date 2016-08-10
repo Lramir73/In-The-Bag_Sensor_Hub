@@ -1,11 +1,12 @@
 void checkSensor(byte num)
 {
   // Get Sensor MAC Address from SensorList
-  Serial.println(F("Starting Sensor Check!"));
+  Serial.print(F("Checking Sensor "));
+  Serial.println(num);
   Sensor * s = SensorList.get(num);
 
   // Connect to the Sensor
-  Serial.println(F("Connecting to Sensor!"));  
+  Serial.println(F("Connecting to Sensor..."));  
   BTSerial.atCO('N',s->address);
   delay(1000);
 
@@ -40,16 +41,12 @@ void checkSensor(byte num)
       Serial.print(h);
       Serial.println(F(" %RH"));
     }
-
-    
-
   }
   
   // Send Data To Be Recorded In SD Card
   SerialB.listen();
   clearAllBuffers();
   sendData(num, t, h);
-
 
   // Check if critical Temperature or Humidity
   if(t >= critTemp && h >= critHum)
@@ -59,8 +56,30 @@ void checkSensor(byte num)
   else if(h >= critHum)
     sendAlert(3);
 
-  Serial.println(F("Sensor Check Done!"));
+  Serial.print(F("Done Checking Sensor "));
+  Serial.println(num);
   
   // Return to listening to Bluetooth
   BTSerial.listen();
 }
+
+
+void checkAllSensors()
+{
+  // Set Busy Status
+  digitalWrite(BUSY_LED, HIGH);
+  
+  Serial.println(F("Performing a Sensor Check!"));
+
+  // Loop through and check each sensor
+  for(byte i = 0; i < SensorList.size(); i++)
+    checkSensor(i);
+
+  Serial.print(F("Done Checking All Sensors!"));
+  // Clear Busy Status
+  digitalWrite(BUSY_LED, LOW);
+}
+
+
+
+

@@ -88,6 +88,7 @@ void getSetupSensor(byte num)
 
 void setupSensors()
 {
+  Serial.println(F("Setting up Sensors..."));
   // Loop and get each sensor address
   for(byte i = 0; i < MAX_SENSORS; i++)
   {
@@ -114,31 +115,11 @@ void setupSensors()
     
   }
 
-
-
-
-
-
-
-
-
-  
-//  // Get Sensor MAC Addresses from Hub_B
-//  sendSetupCommand("9 0", Data);
-//
-//  // Add the Sensor to SensorList
-//  Sensor * newSensor = new Sensor();
-//  memcpy(newSensor->address, Data, ADDR_SIZE);
-//  newSensor->address[ADDR_SIZE] = '\0';
-//
-//  SensorList.add(newSensor);
-//  Serial.print("Sensor 0: ");
-//  Serial.println(newSensor->address);
 }
 
 void printSetup()
 {
-  Serial.println();
+  Serial.println(F("~~~~~Hub Setup Settings~~~~~"));
   Serial.print(F("HubID: "));
   Serial.write(HubID, HUB_ID_SIZE);
   Serial.println();
@@ -150,6 +131,8 @@ void printSetup()
   Serial.println(critTemp);
   Serial.print(F("Critical Humidity: "));
   Serial.println(critHum);
+  Serial.print(F("Number of Sensors: "));
+  Serial.println(SensorList.size());
   Serial.flush();
 }
 

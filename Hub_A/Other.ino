@@ -39,7 +39,7 @@ bool checkModeChange()
   return digitalRead(MODE_SWITCH) != HubMode;
 }
 
-void checkHubSwitch()
+void switchMode()
 {
   if(digitalRead(MODE_SWITCH) != HubMode)
   {
