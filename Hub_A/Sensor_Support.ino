@@ -80,9 +80,6 @@ void checkAllSensors()
   digitalWrite(BUSY_LED, HIGH);
   
   Serial.println(F("Performing a Sensor Check!"));
-  
-  //TODO: FIX ISSUE WHERE IT DOESNT CONNECT PROPERLY 
-  //POSSIBLY DUE TO BEING CONNECTED TO MULTIPLE SENSORS OR UUID ISSUE
 
   // Loop through and check each sensor 
   for(byte i = 0; i < SensorList.size(); i++)
