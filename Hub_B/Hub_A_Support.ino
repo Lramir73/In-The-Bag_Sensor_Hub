@@ -3,13 +3,16 @@
  */
 
 /***** CASE 0 *****/
-void Reset(){
+void Reset()
+{
   //restore the default settings
   //pass the default config to A.
   //put the flag pin low.
 }
 
 /***** CASE 24 *****/
-void TurnOffFlag(){
+void TurnOffFlag()
+{
   digitalWrite(FLAG, LOW);
+  // TODO: Turn Off Alarm
 }

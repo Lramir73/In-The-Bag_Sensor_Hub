@@ -22,7 +22,8 @@ void GetTime(){
 }
 
 /***** CASE 3 *****/
-int SetupDate(){
+int SetupDate()
+{
   Clock.setYear(atoi(SerialB2A.Parameter[1]));
   Clock.setMonth(atoi(SerialB2A.Parameter[2]));
   Clock.setDate(atoi(SerialB2A.Parameter[3]));
@@ -31,7 +32,8 @@ int SetupDate(){
 }
 
 /***** CASE 4 *****/
-void GetDate(){
+void GetDate()
+{
   char temp[2];
   SerialB2A.StartGet("20");
   itoa(Clock.getYear(),temp,10);
@@ -44,4 +46,18 @@ void GetDate(){
   SerialB2A.SendData();
   SerialB2A.ClearAllBuffer();
 }
+
+/***** Alarm Scheduling Functions *****/
+
+
+
+
+
+
+
+
+
+
+
+
 

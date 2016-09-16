@@ -27,13 +27,13 @@ void setupInitial()
 {
   Serial.println(F("Getting Data From SD Card")); 
   // Get Hub ID from Hub_B
-  sendSetupCommand("23", HubID);
+  sendSetupCommand("2", HubID);
   
   // Get Alert Phone Number from Hub_B
-  sendSetupCommand("13", AlertPhone);
+  sendSetupCommand("11", AlertPhone);
   
   // Get Portal Phone Number from Hub_B
-  sendSetupCommand("11", PortalPhone);
+  sendSetupCommand("13", PortalPhone);
 
   // Clean up Buffers again...
   clearAllBuffers();
@@ -49,12 +49,12 @@ void setupInitial()
   memset(Data, '\0', DATA_SIZE);
   
   // Get Critical Temperature from Hub_B
-  sendSetupCommand("19", Data);
+  sendSetupCommand("23", Data);
   critTemp = atoi(Data);
   memset(Data, '\0', DATA_SIZE);
   
   // Get Critical Humidity from Hub_B
-  sendSetupCommand("21", Data);
+  sendSetupCommand("25", Data);
   critHum = atoi(Data);
   memset(Data, '\0', DATA_SIZE);
 }
@@ -64,11 +64,11 @@ void getSetupSensor(byte num)
 {
   // Send a command to Hub_B
   Serial.print(F("Sent: "));
-  Serial.print(9);
+  Serial.print(6);
   Serial.print(' ');
   Serial.println(num);
   
-  SerialB.print(9);
+  SerialB.print(6);
   SerialB.print(' ');
   SerialB.println(num);
   SerialB.flush();

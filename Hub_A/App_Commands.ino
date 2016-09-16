@@ -14,7 +14,7 @@ void getHubID()
 /***** CASE 3 *****/
 void setHubID()
 {
-  sendCommand("22");
+  sendCommand("3");
   if(Buffer[0] == 'd')
     memcpy(HubID, Data, HUB_ID_SIZE);
   else
@@ -43,13 +43,13 @@ void getSensorList()
 /***** CASE 6 *****/
 void getSensorID()
 {
-  
+  // Not Implemented Yet
 }
 
 /***** CASE 7 *****/
 void setSensorID()
 {
-  
+  // Not Implemented Yet
 }
 
 /***** CASE 8 *****/
@@ -109,7 +109,7 @@ void removeSensor()
   SensorList.remove(num);
 
   // Send command to clear the Sensor File in the SD Card
-  sendGetCommand(25);
+  sendGetCommand(10);
 
   // Send Commands to Re-add all Sensors to the SD card file
   for(byte i = 0; i < SensorList.size(); i++)
@@ -130,18 +130,6 @@ void removeSensor()
     
   }
 
-
-
-  
-//  for(byte i = 0; i < SensorList.size(); i++)
-//  {
-//    Sensor * currSensor = SensorList.get(i);
-//    if(memcmp(Data, currSensor->address, ADDR_SIZE) == 0)
-//    {
-//      SensorList.remove(i);
-//    }   
-//  }
-
 }
 
 /***** CASE 10 *****/
@@ -151,7 +139,7 @@ void removeAllSensors()
   SensorList.clear(); 
   
   // Send command to clear the Sensor File in the SD Card
-  sendGetCommand(25);
+  sendGetCommand(10);
 }
 
 /***** CASE 11 *****/
@@ -179,7 +167,7 @@ void getPortalPhone()
 /***** CASE 14 *****/
 void setPortalPhone()
 {
-  sendCommand("10");
+  sendCommand("14");
   if(Buffer[0] == 'd')
     memcpy(PortalPhone, Data, PHONE_SIZE);
   else
@@ -195,7 +183,7 @@ void getPortalFreq()
 /***** CASE 16 *****/
 void setPortalFreq()
 {
-  sendCommand("14");
+  sendCommand("16");
   
   if(Buffer[0] == 'd')
     PortalFreq = atoi(Data);
@@ -212,7 +200,7 @@ void getLoggingFreq()
 /***** CASE 18 *****/
 void setLoggingFreq()
 {
-  sendCommand("16");
+  sendCommand("18");
   
   if(Buffer[0] == 'd')
     PortalFreq = atoi(Data);
@@ -223,7 +211,7 @@ void setLoggingFreq()
 /***** CASE 19 *****/
 void getHubTime()
 {
-  sendGetCommand(2);
+  sendGetCommand(19);
   BTSerial.println(Buffer);
   BTSerial.flush();
 }
@@ -231,7 +219,7 @@ void getHubTime()
 /***** CASE 20 *****/
 void setHubTime()
 {
-  sendCommand("1");
+  sendCommand("20");
 
   if(Buffer[0] == 'd')
     BTSerial.println(F("Time Set!"));
@@ -242,7 +230,7 @@ void setHubTime()
 /***** CASE 21 *****/
 void getHubDate()
 {
-  sendGetCommand(4);
+  sendGetCommand(21);
   BTSerial.println(Buffer);
   BTSerial.flush();
 }
@@ -250,7 +238,7 @@ void getHubDate()
 /***** CASE 22 *****/
 void setHubDate()
 {
-  sendCommand("3");
+  sendCommand("22");
   
   if(Buffer[0] == 'd')
     BTSerial.println(F("Date Set!"));
@@ -267,7 +255,7 @@ void getCritTemp()
 /***** CASE 24 *****/
 void setCritTemp()
 {
-  sendCommand("18");
+  sendCommand("24");
 
   if(Buffer[0] == 'd')
     critTemp = atoi(Data);
@@ -284,7 +272,7 @@ void getCritHum()
 /***** CASE 26 *****/
 void setCritHum()
 {
-  sendCommand("20");
+  sendCommand("26");
   
   if(Buffer[0] == 'd')
     critHum = atoi(Data);
@@ -296,12 +284,12 @@ void setCritHum()
 void getData()
 {
   // Send a command to Hub_B
-  Serial.print(7);
+  Serial.print(27);
   Serial.print(' ');
   Serial.println(Data);
   Serial.flush();
   
-  SerialB.print(7);
+  SerialB.print(27);
   SerialB.print(' ');
   SerialB.println(Data);
   SerialB.flush();

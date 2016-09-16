@@ -87,61 +87,118 @@ void loop() {
     SerialB2A.ReadCommand();
     int i = atoi(SerialB2A.Parameter[0]);
     Serial.flush();
+//    switch(i){
+////      case 0:
+////      {SerialB2A.ReplyStatus(Reset());break;}
+//      case 1:
+//      {SerialB2A.ReplyStatus(SetupTime());break;}
+//      case 2:
+//      {GetTime();break;}
+//      case 3:
+//      {SerialB2A.ReplyStatus(SetupDate());break;}
+//      case 4:
+//      {GetDate();break;}
+////      case 5:
+////      {CheckErrorHistory();break;}
+//      case 6:
+//      {SerialB2A.ReplyStatus(RecordData());break;}
+//      case 7:
+//      {GetData();break;}
+//      case 8:
+//      {SerialB2A.ReplyStatus(SetMacAddress());break;}
+//      case 9:
+//      {GetMacAddress(atoi(SerialB2A.Parameter[1]));break;}
+//      case 10:
+//      {SerialB2A.ReplyStatus(SetPortalPhone());break;}
+//      case 11:
+//      {GetPortalPhone();break;}
+//      case 12:
+//      {SerialB2A.ReplyStatus(SetNotificationPhone());break;}
+//      case 13:
+//      {GetNotificationPhone();break;}
+//      case 14:
+//      {SerialB2A.ReplyStatus(SetPortalNotificationFreq());break;}
+//      case 15:
+//      {GetPortalNotificationFreq();break;}
+//      case 16:
+//      {SerialB2A.ReplyStatus(SetLoggingFreq());break;}
+//      case 17:
+//      {GetLoggingFreq();break;}
+//      case 18:
+//      {SerialB2A.ReplyStatus(SetCritTemp());break;}
+//      case 19:
+//      {GetCritTemp();break;}
+//      case 20:
+//      {SerialB2A.ReplyStatus(SetCritHumidity());break;}
+//      case 21:
+//      {GetCritHumidity();break;}
+//      case 22:
+//      {SerialB2A.ReplyStatus(SetHubID());break;}
+//      case 23:
+//      {GetHubID();break;}
+//      case 24:
+//      {TurnOffFlag();break;}
+//      case 25:
+//      {RemoveAllSensor();break;}
+//    }
     switch(i){
-//      case 0:
-//      {SerialB2A.ReplyStatus(Reset());break;}
       case 1:
-      {SerialB2A.ReplyStatus(SetupTime());break;}
+//      {SerialB2A.ReplyStatus(Reset());break;}
       case 2:
-      {GetTime();break;}
+        {GetHubID();break;}
       case 3:
-      {SerialB2A.ReplyStatus(SetupDate());break;}
-      case 4:
-      {GetDate();break;}
-//      case 5:
-//      {CheckErrorHistory();break;}
-      case 6:
-      {SerialB2A.ReplyStatus(RecordData());break;}
-      case 7:
-      {GetData();break;}
+        {SerialB2A.ReplyStatus(SetHubID());break;}
+      case 4: // CheckErrorHistory
+        {break;}
+      case 5: // Turn off flag
+        {break;}
+      case 6: // Get a sensorID/ MAC address
+        {GetMacAddress(atoi(SerialB2A.Parameter[1]));break;}
+      case 7: // Set a sensor ID
+        {break;}
       case 8:
-      {SerialB2A.ReplyStatus(SetMacAddress());break;}
+        {SerialB2A.ReplyStatus(SetMacAddress());break;}
       case 9:
-      {GetMacAddress(atoi(SerialB2A.Parameter[1]));break;}
+        {break;}
       case 10:
-      {SerialB2A.ReplyStatus(SetPortalPhone());break;}
+        {RemoveAllSensor();break;}
       case 11:
-      {GetPortalPhone();break;}
+        {GetNotificationPhone();break;}
       case 12:
-      {SerialB2A.ReplyStatus(SetNotificationPhone());break;}
+        {SerialB2A.ReplyStatus(SetNotificationPhone());break;}
       case 13:
-      {GetNotificationPhone();break;}
+        {GetPortalPhone();break;}
       case 14:
-      {SerialB2A.ReplyStatus(SetPortalNotificationFreq());break;}
+        {SerialB2A.ReplyStatus(SetPortalPhone());break;}
       case 15:
-      {GetPortalNotificationFreq();break;}
+        {GetPortalNotificationFreq();break;}
       case 16:
-      {SerialB2A.ReplyStatus(SetLoggingFreq());break;}
+        {SerialB2A.ReplyStatus(SetPortalNotificationFreq());break;}
       case 17:
-      {GetLoggingFreq();break;}
+        {GetLoggingFreq();break;}
       case 18:
-      {SerialB2A.ReplyStatus(SetCritTemp());break;}
+        {SerialB2A.ReplyStatus(SetLoggingFreq());break;}
       case 19:
-      {GetCritTemp();break;}
+        {GetTime();break;}
       case 20:
-      {SerialB2A.ReplyStatus(SetCritHumidity());break;}
+        {SerialB2A.ReplyStatus(SetupTime());break;}
       case 21:
-      {GetCritHumidity();break;}
+        {GetDate();break;}
       case 22:
-      {SerialB2A.ReplyStatus(SetHubID());break;}
+        {SerialB2A.ReplyStatus(SetupDate());break;}
       case 23:
-      {GetHubID();break;}
+        {GetCritTemp();break;}
       case 24:
-      {TurnOffFlag();break;}
+        {SerialB2A.ReplyStatus(SetCritTemp());break;}
       case 25:
-      {RemoveAllSensor();break;}
+        {GetCritHumidity();break;}
+      case 26:
+        {SerialB2A.ReplyStatus(SetCritHumidity());break;}
+      case 27:
+        {GetData();break;}
+      case 28:
+        {SerialB2A.ReplyStatus(RecordData());break;}
     }
-
     Serial.println(F("done"));
   }
   else delay(100);
