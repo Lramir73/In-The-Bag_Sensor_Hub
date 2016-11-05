@@ -1,4 +1,5 @@
-void SeekLine(File* Filename,int LineNum){
+void SeekLine(File* Filename,int LineNum)
+{
   Filename->seek(0);
   Serial.println();
   if(LineNum==0)
@@ -11,12 +12,14 @@ void SeekLine(File* Filename,int LineNum){
   }
 }
 
-void MoveCursor(File* Filename){
-  while(Filename->read()!='='){
-  }
+void MoveCursor(File* Filename)
+{
+  while(Filename->read()!='=');
 }
 
-void InitailLine(File* Filename,int LineNum){ //In case of any problems when doing the rewrite.
+void InitailLine(File* Filename,int LineNum)
+{ 
+  //In case of any problems when doing the rewrite.
   SeekLine(Filename,LineNum);
   MoveCursor(Filename);
   Filename->print(F("                    "));
@@ -24,9 +27,10 @@ void InitailLine(File* Filename,int LineNum){ //In case of any problems when doi
   MoveCursor(Filename);
 }
 
-void ReadUntilSpace(File* Filename){
+void ReadUntilSpace(File* Filename)
+{
   int i = 0;
-  while(Filename->peek()!=' '){
+  while(Filename->peek()!=' ')
     SerialB2A.Buffer[i++] = Filename->read();
-  }
+  
 }

@@ -14,5 +14,5 @@ void Reset()
 void TurnOffFlag()
 {
   digitalWrite(FLAG, LOW);
-  // TODO: Turn Off Alarm
+  Clock.checkIfAlarm(1);
 }

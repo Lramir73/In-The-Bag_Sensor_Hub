@@ -1,5 +1,6 @@
 /***** CASE 1 *****/
-int SetupTime(){
+int SetupTime()
+{
   Clock.setHour(atoi(SerialB2A.Parameter[1]));
   Clock.setMinute(atoi(SerialB2A.Parameter[2]));
   Clock.setSecond(atoi(SerialB2A.Parameter[3]));
@@ -8,7 +9,8 @@ int SetupTime(){
 }
 
 /***** CASE 2 *****/
-void GetTime(){
+void GetTime()
+{
   char temp[2];
   itoa(Clock.getHour(h12,PM),temp,10);
   SerialB2A.StartGet(temp);

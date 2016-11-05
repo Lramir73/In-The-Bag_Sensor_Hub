@@ -1,5 +1,6 @@
 /***** CASE 5 *****/
-void CheckErrorHistory(){
+void CheckErrorHistory()
+{
   
 }
 
@@ -16,7 +17,8 @@ int RecordData()
   File dataFile = SD.open(SerialB2A.TimeBuffer, FILE_WRITE);
   if(dataFile)
   {
-    if(dataFile.size()<=1){ // Add the headings
+    if(dataFile.size() <= 1)
+    { // Add the headings
       dataFile.println(F("Date,Time,Sensor ID,Temperature,Humidity"));
     }
     dataFile.print(F("20"));
